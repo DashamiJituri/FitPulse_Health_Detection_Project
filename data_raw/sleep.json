@@ -5,78 +5,78 @@
   "cycles": [
     {
       "timestamp": "2025-01-12T23:45:00",
-      "stage": "rem",
-      "duration_min": 31
+      "stage": "deep",
+      "duration_min": 18
     },
     {
       "timestamp": "2025-01-13T00:15:00",
-      "stage": "light",
-      "duration_min": 16
+      "stage": "deep",
+      "duration_min": 39
     },
     {
       "timestamp": "2025-01-13T00:45:00",
-      "stage": "rem",
-      "duration_min": 39
+      "stage": "deep",
+      "duration_min": 17
     },
     {
       "timestamp": "2025-01-13T01:15:00",
       "stage": "rem",
-      "duration_min": 25
+      "duration_min": 33
     },
     {
       "timestamp": "2025-01-13T01:45:00",
-      "stage": "deep",
-      "duration_min": 18
+      "stage": "rem",
+      "duration_min": 30
     },
     {
       "timestamp": "2025-01-13T02:15:00",
-      "stage": "deep",
-      "duration_min": 18
+      "stage": "rem",
+      "duration_min": 33
     },
     {
       "timestamp": "2025-01-13T02:45:00",
-      "stage": "light",
-      "duration_min": 26
+      "stage": "deep",
+      "duration_min": 20
     },
     {
       "timestamp": "2025-01-13T03:15:00",
       "stage": "light",
-      "duration_min": 38
+      "duration_min": 16
     },
     {
       "timestamp": "2025-01-13T03:45:00",
       "stage": "deep",
-      "duration_min": 33
+      "duration_min": 37
     },
     {
       "timestamp": "2025-01-13T04:15:00",
-      "stage": "light",
-      "duration_min": 16
+      "stage": "rem",
+      "duration_min": 30
     },
     {
       "timestamp": "2025-01-13T04:45:00",
-      "stage": "deep",
-      "duration_min": 23
+      "stage": "light",
+      "duration_min": 15
     },
     {
       "timestamp": "2025-01-13T05:15:00",
       "stage": "light",
-      "duration_min": 28
+      "duration_min": 21
     },
     {
       "timestamp": "2025-01-13T05:45:00",
-      "stage": "rem",
-      "duration_min": 19
+      "stage": "deep",
+      "duration_min": 28
     },
     {
       "timestamp": "2025-01-13T06:15:00",
-      "stage": "deep",
-      "duration_min": 28
+      "stage": "light",
+      "duration_min": 29
     },
     {
       "timestamp": "2025-01-13T06:45:00",
       "stage": "deep",
-      "duration_min": 36
+      "duration_min": 28
     }
   ]
 }

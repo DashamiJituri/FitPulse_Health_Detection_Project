@@ -19,6 +19,8 @@ from src.forecasting import (
 from src.milestone3.comparison import daily_comparison
 from src.milestone3.anomaly_detection import detect_anomalies
 from src.milestone3.behavior_analysis import analyze_behavior
+from src.milestone4.report_utils import generate_summary_report
+
 
 
 # --------------------------------------------------
@@ -188,3 +190,29 @@ if st.session_state.clean_df is not None:
     s1, s2 = st.columns(2)
     s1.metric("Wellness Score", score)
     s2.metric("Health Status", status)
+
+
+# --------------------------------------------------
+# STEP 5: Milestone 4 – Unified Dashboard & Export
+# --------------------------------------------------
+st.header("🧩 Milestone 4 – Unified Dashboard & Productivity")
+
+if st.session_state.clean_df is not None:
+
+    st.subheader("📋 Auto-Generated Health Summary")
+    summary_df = generate_summary_report(st.session_state.clean_df)
+    st.dataframe(summary_df)
+
+    st.download_button(
+        label="⬇ Download Summary Report",
+        data=summary_df.to_csv(index=False),
+        file_name="fitpulse_summary_report.csv"
+    )
+
+    st.download_button(
+        label="⬇ Download Cleaned Dataset",
+        data=st.session_state.clean_df.to_csv(index=False),
+        file_name="cleaned_fitness_data.csv"
+    )
+else:
+    st.info("Please run preprocessing to enable report export.")
