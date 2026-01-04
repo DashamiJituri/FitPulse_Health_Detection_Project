@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import os
+import numpy as np
 
 from src.generate_data import (
     generate_heart_rate_csv,
@@ -9,105 +10,181 @@ from src.generate_data import (
 )
 
 from src.preprocess import run_preprocessing
+from src.forecasting import (
+    forecast_heart_rate,
+    forecast_sleep,
+    forecast_steps_with_events
+)
+
+from src.milestone3.comparison import daily_comparison
+from src.milestone3.anomaly_detection import detect_anomalies
+from src.milestone3.behavior_analysis import analyze_behavior
 
 
-st.set_page_config(page_title="FitPulse – Task 1", layout="wide")
+# --------------------------------------------------
+# PAGE CONFIG
+# --------------------------------------------------
+st.set_page_config(page_title="FitPulse – Milestones 1, 2 & 3", layout="wide")
+st.title("🔥 FitPulse – Data Collection, Forecasting & Intelligence Platform")
 
-st.title("🔥 FitPulse:  – Data Collection & Cleaning Dashboard")
-
-# ------------------------------------------------------------------
-# SESSION STATE INITIALIZATION
-# ------------------------------------------------------------------
-
-if "hr_df" not in st.session_state:
-    st.session_state.hr_df = None
-
-if "steps_df" not in st.session_state:
-    st.session_state.steps_df = None
-
-if "sleep_df" not in st.session_state:
-    st.session_state.sleep_df = None
-
-if "clean_df" not in st.session_state:
-    st.session_state.clean_df = None
+# --------------------------------------------------
+# SESSION STATE INIT
+# --------------------------------------------------
+for key in ["hr_df", "steps_df", "sleep_df", "clean_df"]:
+    if key not in st.session_state:
+        st.session_state[key] = None
 
 
-# ------------------------------------------------------------------
-# DATA GENERATION SECTION
-# ------------------------------------------------------------------
+# --------------------------------------------------
+# STEP 1: DATA GENERATION
+# --------------------------------------------------
+st.header("📌 Step 1: Generate Raw Fitness Data")
 
-st.header("📌 Step 1: Generate Raw Datasets")
+btn_col1, btn_col2, btn_col3 = st.columns(3)
 
-col1, col2, col3 = st.columns(3)
-
-# ----------------- HEART RATE -----------------
-with col1:
+with btn_col1:
     if st.button("Generate Heart Rate Data"):
-        df = generate_heart_rate_csv()
-        st.session_state.hr_df = df
-        st.success("Heart Rate data generated!")
+        st.session_state.hr_df = generate_heart_rate_csv()
+        st.success("Heart Rate data generated")
 
-if st.session_state.hr_df is not None:
-    st.subheader("📍 Heart Rate Data")
-    st.dataframe(st.session_state.hr_df.head())
-
-# ----------------- STEPS DATA -----------------
-with col2:
+with btn_col2:
     if st.button("Generate Steps Data"):
-        df = generate_steps_csv()
-        st.session_state.steps_df = df
-        st.success("Steps data generated!")
+        st.session_state.steps_df = generate_steps_csv()
+        st.success("Steps data generated")
 
-if st.session_state.steps_df is not None:
-    st.subheader("📍 Steps Data")
-    st.dataframe(st.session_state.steps_df.head())
-
-# ----------------- SLEEP DATA -----------------
-with col3:
+with btn_col3:
     if st.button("Generate Sleep Data"):
         sleep_json = generate_sleep_json()
-        df_sleep = pd.DataFrame(sleep_json["cycles"])
-        st.session_state.sleep_df = df_sleep
-        st.success("Sleep data generated!")
+        st.session_state.sleep_df = pd.DataFrame(sleep_json["cycles"])
+        st.success("Sleep data generated")
 
-if st.session_state.sleep_df is not None:
-    st.subheader("📍 Sleep Data ")
-    st.dataframe(st.session_state.sleep_df.head())
+# Preview
+st.subheader("📍 Generated Raw Data Preview")
+c1, c2, c3 = st.columns(3)
+
+with c1:
+    if st.session_state.hr_df is not None:
+        st.dataframe(st.session_state.hr_df.head())
+
+with c2:
+    if st.session_state.steps_df is not None:
+        st.dataframe(st.session_state.steps_df.head())
+
+with c3:
+    if st.session_state.sleep_df is not None:
+        st.dataframe(st.session_state.sleep_df.head())
 
 
-# ------------------------------------------------------------------
-# PREPROCESSING SECTION
-# ------------------------------------------------------------------
-
-st.header("📌 Step 2: Clean & Merge All Data")
+# --------------------------------------------------
+# STEP 2: PREPROCESSING
+# --------------------------------------------------
+st.header("📌 Step 2: Clean & Merge Data")
 
 if st.button("Run Preprocessing Pipeline"):
     run_preprocessing()
-
     cleaned_path = "data_clean/cleaned_fitness_data.csv"
+
     if os.path.exists(cleaned_path):
-        df_clean = pd.read_csv(cleaned_path)
-        st.session_state.clean_df = df_clean
+        df = pd.read_csv(cleaned_path).dropna()
+        df["timestamp"] = pd.to_datetime(df["timestamp"])
+        st.session_state.clean_df = df
         st.success("🎉 Cleaning & Merging Completed")
 
-# SHOW CLEANED DATA
 if st.session_state.clean_df is not None:
     st.subheader("🧹 Cleaned Fitness Data")
-    st.dataframe(st.session_state.clean_df.head(30))
+    st.dataframe(st.session_state.clean_df.head(20))
 
-    st.download_button(
-        label="⬇ Download Cleaned CSV",
-        data=st.session_state.clean_df.to_csv(index=False),
-        file_name="cleaned_fitness_data.csv"
+
+# --------------------------------------------------
+# STEP 3: FORECASTING (MILESTONE 2)
+# --------------------------------------------------
+st.header("📌 Step 3: Forecasting (Milestone 2)")
+
+forecast_task = st.selectbox(
+    "Select Forecast Task",
+    ["Heart Rate Forecast", "Sleep Duration Forecast", "Steps Forecast"]
+)
+
+if st.button("Run Forecast"):
+    if len(st.session_state.clean_df) < 10:
+        st.error("Not enough data for forecasting")
+    else:
+        df = st.session_state.clean_df.copy()
+
+        if forecast_task == "Heart Rate Forecast":
+            model, forecast = forecast_heart_rate(df)
+        elif forecast_task == "Sleep Duration Forecast":
+            model, forecast = forecast_sleep(df)
+        else:
+            model, forecast = forecast_steps_with_events(df)
+
+        st.pyplot(model.plot(forecast))
+        st.pyplot(model.plot_components(forecast))
+
+
+# --------------------------------------------------
+# STEP 4: Milestone 3 – Intelligence Layer
+# --------------------------------------------------
+st.header("🚀 Milestone 3 – Intelligence Layer")
+
+if st.session_state.clean_df is not None:
+    df = st.session_state.clean_df.copy()
+
+    # --------- Fix unrealistic values (for demo clarity) ----------
+    df["sleep_hours"] = df["sleep_hours"].clip(lower=5.5, upper=8.5)
+    df["steps"] = df["steps"].clip(lower=800, upper=12000)
+
+    # ----------------- Daily Comparative Analytics -----------------
+    st.subheader("📊 Daily Comparative Analytics")
+    daily_df = daily_comparison(df)
+    st.dataframe(daily_df)
+
+    st.line_chart(
+    df.set_index("timestamp")["heart_rate"],
+    height=300
+)
+
+    # ----------------- Anomaly Detection -----------------
+    st.subheader("⚠ Heart Rate Anomaly Detection")
+    anomaly_df = detect_anomalies(df)
+    anomaly_count = int(anomaly_df["anomaly"].sum())
+
+    st.metric(
+        label="Total Heart Rate Anomalies Detected",
+        value=anomaly_count
     )
 
-    # Visualization
-    st.subheader("📊 Heart Rate Trend")
-    st.line_chart(st.session_state.clean_df.set_index("timestamp")["heart_rate"])
+    # ----------------- Behaviour Analysis -----------------
+    st.subheader("🧠 Behaviour Analysis Summary")
+    behavior = analyze_behavior(df)
 
-    st.subheader("📈 Summary Insights")
-    colA, colB, colC, colD = st.columns(4)
-    colA.metric("Min HR", st.session_state.clean_df["heart_rate"].min())
-    colB.metric("Max HR", st.session_state.clean_df["heart_rate"].max())
-    colC.metric("Avg Steps", int(st.session_state.clean_df["steps"].mean()))
-    colD.metric("Avg Sleep (hrs)", round(st.session_state.clean_df["sleep_hours"].mean(), 2))
+    b1, b2, b3 = st.columns(3)
+    b1.metric("Avg Daily Steps", int(behavior["average_steps"]))
+    b2.metric("Avg Sleep (hrs)", round(behavior["average_sleep_hours"], 1))
+    b3.metric("Lifestyle", behavior["behavior_label"])
+
+    # ----------------- NEW FEATURE: Wellness Score -----------------
+    st.subheader("🌿 Overall Wellness Score")
+
+    avg_hr = daily_df["avg_heart_rate"].mean()
+    avg_steps = behavior["average_steps"]
+    avg_sleep = behavior["average_sleep_hours"]
+
+    score = (
+        (100 - abs(avg_hr - 70)) * 0.4 +
+        min(avg_steps / 100, 100) * 0.3 +
+        (avg_sleep / 8 * 100) * 0.3
+    )
+
+    score = int(min(max(score, 0), 100))
+
+    if score >= 75:
+        status = "Good 😊"
+    elif score >= 50:
+        status = "Moderate 🙂"
+    else:
+        status = "Needs Improvement ⚠"
+
+    s1, s2 = st.columns(2)
+    s1.metric("Wellness Score", score)
+    s2.metric("Health Status", status)
