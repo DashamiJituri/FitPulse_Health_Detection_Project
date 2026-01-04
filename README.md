@@ -68,6 +68,18 @@ Features Implemented
         • Transforms raw metrics into meaningful health insights
         • Adds intelligence beyond basic visualization
 
+
+🧩 Milestone 4 – Unified Dashboard & Productivity
+Features Implemented:
+
+        • Integrated all milestones into a single Streamlit dashboard
+        • Centralized access to data generation, preprocessing, forecasting, and insights
+        • Automated health summary generation from cleaned data
+        • Export options for cleaned dataset and summary report (CSV)
+
+Outcome:
+        • Milestone 4 transforms FitPulse into a unified, user-friendly application with productivity features that simplify analysis, reporting, and result sharing.
+
 🛠️ Technology Stack
 
 Frontend / UI: Streamlit
@@ -85,7 +97,9 @@ FitPulse_Health_Detection_Project/
 │   ├── generate_data/          # Synthetic data generators
 │   ├── preprocess/             # Cleaning & merging logic
 │   ├── forecasting/            # Forecasting models
-│   └── milestone3/             # Intelligence features
+│   ├── milestone3/
+└── ├milestone4/
+      └── report_utils.py         
 │
 ├── data_raw/                   # Generated raw data
 ├── data_clean/                 # Cleaned datasets
